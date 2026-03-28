@@ -27,7 +27,4 @@ public class AccountDTO {
     @PositiveOrZero(message = "Balance cannot be negative")
     private BigDecimal balance;
 
-    private Long version;
-
-
 }

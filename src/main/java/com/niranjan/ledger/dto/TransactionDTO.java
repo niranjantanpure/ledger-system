@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Valid
 
 public class TransactionDTO {
 
@@ -31,7 +32,5 @@ public class TransactionDTO {
 
     @NotNull
     private String requestKey;
-
-
 
 }

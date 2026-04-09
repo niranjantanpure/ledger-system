@@ -6,6 +6,7 @@ import com.niranjan.ledger.entity.Transaction;
 import com.niranjan.ledger.exception.AccountNotFoundException;
 import com.niranjan.ledger.exception.DuplicateTransactionException;
 import com.niranjan.ledger.exception.InsufficientBalanceException;
+import com.niranjan.ledger.exception.TransactionNotFoundException;
 import com.niranjan.ledger.repository.AccountRepository;
 import com.niranjan.ledger.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +88,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional(readOnly = true)
     public List<TransactionDTO> getTransactionsByAccountId(Long accountId) {
+        return transactionRepository.findByFromAccountIdOrToAccountId(accountId, accountId).stream()
         // Need to add this method to TransactionRepository if needed,
         // but for now I'll filter from all or implement findByAccountId in repository.
         // Let's keep it simple for now or update Repository.

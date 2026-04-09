@@ -1,9 +1,8 @@
 package com.niranjan.ledger.dto;
 
-import jakarta.validation.Valid;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -12,20 +11,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Valid
-
 public class TransactionDTO {
 
     private Long id;
 
-    @NotNull(message = "Account Number required")
+    @NotNull(message = "Source account id is required")
     private Long fromAccountId;
 
-    @NotNull(message = "Account Number is required")
+    @NotNull(message = "Destination account id is required")
     private Long toAccountId;
 
     @NotNull(message = "Amount is required")
-    @PositiveOrZero(message = "Amount must be positive")
+    @Positive(message = "Amount must be greater than zero")
     private BigDecimal amount;
 
     private LocalDateTime timestamp;

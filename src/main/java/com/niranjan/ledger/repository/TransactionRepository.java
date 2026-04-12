@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     boolean existsByRequestKey(String requestKey);
+
+    List<Transaction> findByFromAccountIdOrToAccountId(Long fromAccountId, Long toAccountId);
 }

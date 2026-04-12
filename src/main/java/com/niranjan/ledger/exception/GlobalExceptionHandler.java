@@ -2,6 +2,7 @@ package com.niranjan.ledger.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -42,6 +43,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateTransactionException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateTransactionException(DuplicateTransactionException ex) {
         return createErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
+        return createErrorResponse(HttpStatus.CONFLICT, "Concurrent update conflict; retry the operation.");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

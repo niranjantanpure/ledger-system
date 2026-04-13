@@ -36,12 +36,22 @@ public class TransactionServiceImpl implements TransactionService {
             throw new DuplicateTransactionException("Transaction with request key already exists: " + transactionDTO.getRequestKey());
         }
 
-        // 3. Find accounts
-        Account fromAccount = accountRepository.findById(transactionDTO.getFromAccountId())
-                .orElseThrow(() -> new AccountNotFoundException("Source account not found with id: " + transactionDTO.getFromAccountId()));
+        // 3. Lock account rows in deterministic order (by id) to avoid deadlocks
+        Long fromId = transactionDTO.getFromAccountId();
+        Long toId = transactionDTO.getToAccountId();
+        long lowId = Math.min(fromId, toId);
+        long highId = Math.max(fromId, toId);
 
-        Account toAccount = accountRepository.findById(transactionDTO.getToAccountId())
-                .orElseThrow(() -> new AccountNotFoundException("Destination account not found with id: " + transactionDTO.getToAccountId()));
+        Account lowAccount = accountRepository.findByIdForUpdate(lowId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        (lowId == fromId ? "Source" : "Destination") + " account not found with id: " + lowId));
+
+        Account highAccount = accountRepository.findByIdForUpdate(highId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        (highId == fromId ? "Source" : "Destination") + " account not found with id: " + highId));
+
+        Account fromAccount = fromId.equals(lowId) ? lowAccount : highAccount;
+        Account toAccount = toId.equals(lowId) ? lowAccount : highAccount;
 
         // 4. Check balance
         if (fromAccount.getBalance().compareTo(transactionDTO.getAmount()) < 0) {
@@ -73,7 +83,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional(readOnly = true)
     public TransactionDTO getTransactionById(Long id) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id));
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found with id: " + id));
         return mapToDTO(transaction);
     }
 
@@ -89,11 +99,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional(readOnly = true)
     public List<TransactionDTO> getTransactionsByAccountId(Long accountId) {
         return transactionRepository.findByFromAccountIdOrToAccountId(accountId, accountId).stream()
-        // Need to add this method to TransactionRepository if needed,
-        // but for now I'll filter from all or implement findByAccountId in repository.
-        // Let's keep it simple for now or update Repository.
-        return transactionRepository.findAll().stream()
-                .filter(t -> t.getFromAccountId().equals(accountId) || t.getToAccountId().equals(accountId))
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

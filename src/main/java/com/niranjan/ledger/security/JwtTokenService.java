@@ -14,10 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Optional;
 
-/**
- * Creates and validates signed JWT access tokens (HS256). Wire this from a login endpoint
- * and from a {@code OncePerRequestFilter} when you replace HTTP Basic with Bearer tokens.
- */
 @Component
 public class JwtTokenService {
 

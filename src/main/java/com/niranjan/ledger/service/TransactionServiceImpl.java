@@ -33,7 +33,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         // 2. Idempotency check
         if (transactionRepository.existsByRequestKey(transactionDTO.getRequestKey())) {
-            throw new DuplicateTransactionException("Transaction with request key already exists: " + transactionDTO.getRequestKey());
+            throw new DuplicateTransactionException(
+                    "Transaction with request key already exists: " + transactionDTO.getRequestKey());
         }
 
         // 3. Lock account rows in deterministic order (by id) to avoid deadlocks

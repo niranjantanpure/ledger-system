@@ -22,6 +22,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     @Transactional
@@ -76,7 +77,12 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        return mapToDTO(savedTransaction);
+        TransactionDTO result = mapToDTO(savedTransaction);
+        
+        // Publish to Kafka for downstream processing (notifications, audit, etc.)
+        kafkaTemplate.send(com.niranjan.ledger.config.KafkaConfig.TRANSACTIONS_TOPIC, result);
+
+        return result;
     }
 
     @Override
